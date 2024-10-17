@@ -1,13 +1,230 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'CustomFont';
+  src: url('../font/palatino-linotype.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'CustomFontBold';
+  src: url('../font/palatinolinotype_bold.ttf') format('truetype');
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: rgb(16, 16, 16);;
+}
+
+h1,h2,h3,h4,h5,h6,p,span,div,ul,li{
+  margin: 0;
+}
+
+td, span {
+  font-family: "Poppins", sans-serif !important;
+}
+
+td{
+  padding: 16px 8px !important;
+}
+
+th{
+  /*background: #F7F8FA !important;*/
+  /*border: 1px solid #EFF0F4 !important;;*/
+  /*border-radius: 8px !important;;*/
+  text-wrap: nowrap !important;
+  padding:  16px 10px !important;
+}
+
+tr{
+  padding-left: 16px !important;
+}
+
+a {
+  background-color: transparent;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+img{
+  display: block;
+  max-width: 100%;
+}
+
+.logo-white{
+  aspect-ratio: 2.96875;
+  cursor: pointer;
+  height: auto;
+  margin: 16px 0;
+  max-width: 100px;
+  width: 100%;
+}
+
+.arc{
+  fill: rgb(45, 125, 164) !important;
+}
+
+.nav-tabs{
+  /* Segments=3, Mode=Light */
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 3px;
+  /* Greyscale/50 */
+  background: #ECEFF3;
+  border-radius: 8px;
+
+}
+
+.nav-tabs li{
+  flex: 1;
+}
+
+.nav-tabs button{
+  width: 100%;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 155%;
+  /* identical to box height, or 22px */
+  display: flex;
+  align-items: center;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  color: #666D80;
+}
+
+.nav-tabs button.active{
+  background: #FFFFFF;
+  /* Shadow/Small */
+  box-shadow: 0px 0px 1px rgba(20, 20, 20, 0.04), 0px 0px 8px rgba(20, 20, 20, 0.08);
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 155%;
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  /* Greyscale/900 */
+  color: #0D0D12;
+
+
+}
+
+.second-font{
+  font-family: 'CustomFont', 'Poppins', 'sans-serif' !important;
+}
+
+.second-font span{
+  font-family: 'CustomFont', 'Poppins', 'sans-serif' !important;
+}
+.second-font-bold span, .second-font-bold{
+  font-family: 'CustomFontBold', 'Poppins', 'sans-serif' !important;
+}
+
+.table thead{
+  border: none !important;
+}
+
+.table th{
+  height: 50px;
+}
+
+.table th:first-child{
+  padding-left: 24px;
+}
+
+.table td{
+  text-align: right;
+  /*padding: 8px 24px;*/
+}
+
+.table th{
+  border-right: 1px solid #EFF0F4;
+  border-bottom: 1px solid #EFF0F4;
+}
+
+.table td:first-child {
+  text-align: left;
+  padding-left: 24px;
+  width: 40%; /* Adjust this value as needed */
+}
+
+.table td, .table-1 td{
+  font-family: 'CustomFont', 'Poppins', 'sans-serif' !important;
+  border-right: 1px solid #EFF0F4;
+  /*height: 40px;*/
+}
+
+
+tfoot, tfoot tr, tfoot tr td{
+  background:  rgb(187, 187, 187);
+}
+tfoot td{
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.table-1 td{
+  width: 15.5%;
+}
+.table-1 td:last-child{
+  width: 16%;
+}
+.table-1 td:first-child {
+  padding-left: 24px;
+  width: 60%;
+  font-weight: 900;
+}
+
+.table-1 tr{
+  border-top: 1px solid #EFF0F4;
+}
+
+.table-1 td{
+  padding-right: 8px;
+}
+
+.disabled {
+  pointer-events: none; /* Prevent clicks */
+  cursor: not-allowed; /* Change cursor to indicate it's not clickable */
+  opacity: 0.6; /* Make the link look disabled */
+}
+
+
+@media print {
+  body {
+    width: 610mm; /* A4 size */
+    margin: 0;
+  }
+
+  table {
+    width: 100%;
+    table-layout: fixed; /* Prevents squeezing */
+  }
+
+  table th, table td {
+    word-wrap: break-word; /* Prevents overflow */
+    padding: 8px;
+  }
+
+  .page-break {
+    page-break-before: always; /* Forces a new page */
+  }
 }

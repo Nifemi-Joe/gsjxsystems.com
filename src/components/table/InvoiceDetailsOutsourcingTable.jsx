@@ -53,123 +53,61 @@ const SummarySection = styled.div`
 const SummaryItem = styled.p`
   font-weight: bold;
 `;
-const InvoiceDetailsTable = ({invoiceData}) => {
+const InvoiceDetailsOutsourcingTable = ({invoiceData}) => {
 	const formatNumber = (num) => {
 		return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 	};
-	const serviceOneTotalUsd = () => {
+
+	const rolesTotalNgn = () => {
 		let total = 0;
-		invoiceData.service1.transactions.map((transaction)=> {
-			total = total + transaction.totalfee_usd
-		})
-		return total
-	}
-	const serviceOneTotalNgn = () => {
-		let total = 0;
-		invoiceData.service1.transactions.map((transaction)=> {
-			total = total + transaction.totalfee_ngn
-		})
-		return total
-	}
-	const serviceTwoTotalUsd = () => {
-		let total = 0;
-		invoiceData.service2.transactions.map((transaction)=> {
-			total = total + transaction.totalfee_usd
-		})
-		return total
-	}
-	const serviceTwoTotalNgn = () => {
-		let total = 0;
-		invoiceData.service2.transactions.map((transaction)=> {
-			if (transaction.totalfee_ngn){
-				total = total + transaction.totalfee_ngn
-			}
-			else {
-				total = total + (transaction.totalfee_usd * transaction.usd_ngn_rate)
-			}
+		invoiceData.roles.forEach((transaction)=> {
+			total = total + (transaction.unit_fee * transaction.count)
 		})
 		return total
 	}
 	return(
 		<InvoiceContainer>
-			<a href="#" className="text-right justify-end flex text-blue-500">+ Add Transaction</a>
-			<SectionTitle>A - Authentication Fees</SectionTitle>
+			<a href="#" className="text-right justify-end flex text-blue-500">+ Add Role</a>
+			<SectionTitle>PERSONNEL OUTSOURCING SERVICE FOR PERIOD: </SectionTitle>
 			<Table>
 				<thead>
 				<TableRow>
-					<TableHeader>Description</TableHeader>
-					<TableHeader>Volume</TableHeader>
-					<TableHeader>Unit Fee (USD)</TableHeader>
-					<TableHeader>Total Fee (USD)</TableHeader>
-					<TableHeader>Total Fee (NGN)</TableHeader>
+					<TableHeader>Role Description</TableHeader>
+					<TableHeader>Role Count</TableHeader>
+					<TableHeader>Unit Fee ({invoiceData.currency})</TableHeader>
+					<TableHeader>Total Fee ({invoiceData.currency})</TableHeader>
 				</TableRow>
 				</thead>
 				<tbody>
 				{
-					invoiceData.service1.transactions.map((transaction, index) => <TableRow key={index}>
-						<TableData>{transaction.description}</TableData>
-						<TableData>{transaction.volume && transaction.volume.toLocaleString()}</TableData>
-						<TableData>{formatNumber(transaction.unitfee_usd)}</TableData>
-						<TableData>{formatNumber(transaction.totalfee_usd)}</TableData>
-						<TableData style={{textAlign: "right"}}>{formatNumber(transaction.totalfee_ngn)}</TableData>
+					invoiceData.roles.map((transaction, index) => <TableRow key={index}>
+						<TableData>{transaction.name}</TableData>
+						<TableData>{transaction.count && transaction.count.toLocaleString()}</TableData>
+						<TableData>{formatNumber(transaction.unit_fee)}</TableData>
+						<TableData style={{textAlign: "right"}}>{formatNumber(transaction.unit_fee * transaction.count)}</TableData>
 					</TableRow>)
 				}
 
 				<TableRow style={{fontWeight: 500}}>
 					<TableData colSpan="3">Sub-Total</TableData>
-					<TableData>{formatNumber(serviceOneTotalUsd())}</TableData>
-					<TableData style={{textAlign: "right"}}>{formatNumber(serviceOneTotalNgn())}</TableData>
-				</TableRow>
-				</tbody>
-			</Table>
-			<a href="#" className="text-right justify-end flex text-blue-500">+ Add Transaction</a>
-			<SectionTitle>B - Monthly Hosting Fees</SectionTitle>
-			<Table>
-				<thead>
-				<TableRow>
-					<TableHeader>Description</TableHeader>
-					<TableHeader>Volume</TableHeader>
-					<TableHeader>Unit Fee (USD)</TableHeader>
-					<TableHeader>Total Fee (USD)</TableHeader>
-					<TableHeader>Total Fee (NGN)</TableHeader>
-				</TableRow>
-				</thead>
-				<tbody>
-				{
-					invoiceData.service2.transactions.map((transaction, index) => <TableRow key={index}>
-						<TableData>{transaction.description}</TableData>
-						<TableData>{transaction.volume && transaction.volume.toLocaleString()}</TableData>
-						<TableData>{formatNumber(transaction.unitfee_usd)}</TableData>
-						<TableData>{formatNumber(transaction.totalfee_usd)}</TableData>
-						<TableData  style={{textAlign: "right"}}>{transaction.totalfee_ngn ? formatNumber(transaction.totalfee_ngn) : formatNumber((transaction.totalfee_usd * transaction.usd_ngn_rate))}</TableData>
-					</TableRow>)
-				}
-				<TableRow style={{fontWeight: 500}}>
-					<TableData colSpan="3">Sub-Total</TableData>
-					<TableData>{formatNumber(serviceTwoTotalUsd())}</TableData>
-					<TableData style={{textAlign: "right"}}>{formatNumber(serviceTwoTotalNgn())}</TableData>
+					<TableData  style={{textAlign: "right"}}>{formatNumber(rolesTotalNgn())}</TableData>
+					{/*<TableData style={{textAlign: "right"}}>{formatNumber(rolesTotalNgn())}</TableData>*/}
 				</TableRow>
 				</tbody>
 			</Table>
 			<Table>
 				<TableRow style={{fontWeight: 500}}>
-					<TableData colSpan="5" style={{width: "55%"}}>Total Fee (A + B)</TableData>
-					<TableData style={{width: "22%"}}>{formatNumber((serviceOneTotalUsd() + serviceTwoTotalUsd()))}</TableData>
-					<TableData style={{textAlign: "right"}}>{formatNumber((serviceOneTotalNgn() + serviceTwoTotalNgn()))}</TableData>
+					<TableData colSpan="5" style={{width: "67%"}}>Total Fee </TableData>
+					<TableData style={{width: "20%", textAlign: "right"}}>{formatNumber(rolesTotalNgn())}</TableData>
 				</TableRow>
 				<TableRow style={{fontWeight: 500}}>
 					<TableData colSpan="5">VAT</TableData>
-					<TableData>{formatNumber((7.5 / 100) * (serviceOneTotalUsd() + serviceTwoTotalUsd()))}</TableData>
-					<TableData style={{textAlign: "right"}}>{formatNumber((7.5 / 100) * (serviceOneTotalNgn() + serviceTwoTotalNgn()))}</TableData>
+					<TableData style={{textAlign: "right"}}>{formatNumber((7.5 / 100) * (rolesTotalNgn()))}</TableData>
 				</TableRow>
 				<tfoot>
 					<TableRow style={{fontWeight: 500}}>
-						<TableData colSpan="5" style={{padding: "8px"}}>GRAND TOTAL in USD</TableData>
-						<TableData style={{textAlign: "right"}} colSpan="5">{formatNumber(((7.5 / 100) * (serviceOneTotalUsd() + serviceTwoTotalUsd()) + (serviceOneTotalUsd() + serviceTwoTotalUsd())))}</TableData>
-					</TableRow>
-					<TableRow style={{fontWeight: 500}}>
-						<TableData colSpan="5">GRAND TOTAL in NGN (CBN: N1,592.08/$1)</TableData>
-						<TableData style={{textAlign: "right"}} colSpan="5">{formatNumber(((7.5 / 100) * (serviceOneTotalNgn() + serviceTwoTotalNgn()) + (serviceOneTotalNgn() + serviceTwoTotalNgn())))}</TableData>
+						<TableData colSpan="5" style={{padding: "8px"}}>GRAND TOTAL in {invoiceData.currency}</TableData>
+						<TableData style={{textAlign: "right"}} colSpan="5">{formatNumber(((7.5 / 100) * rolesTotalNgn()) + rolesTotalNgn())}</TableData>
 					</TableRow>
 				</tfoot>
 
@@ -179,4 +117,4 @@ const InvoiceDetailsTable = ({invoiceData}) => {
 		</InvoiceContainer>
 	)
 }
-export default InvoiceDetailsTable
+export default InvoiceDetailsOutsourcingTable

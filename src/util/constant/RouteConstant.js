@@ -4,13 +4,13 @@ export const RouteConstant = {
         //     path:'/',
         //     name:'Home screen'
         // },
-        health: {
-            path:'/health',
-            name:'Health'
+        login: {
+            path:'/login',
+            name:'Login'
         },
-        fitness: {
-            path:'/fitness',
-            name:'Fitness'
+        register: {
+            path:'/register',
+            name:'Register'
         },
         blog: {
             path:'/blog',
@@ -68,34 +68,76 @@ export const RouteConstant = {
             name:'signup-success'
         }
     },
+    admin: {
+        dashboard: {
+            path: "/admin/dashboard",
+            name: "dashboard"
+        },
+        users: {
+            path: "/admin/users",
+            name: "users"
+        },
+        company: {
+            path: "/admin/companies",
+            name: "companies"
+        },
+        audit: {
+            path: "/admin/audit-logs",
+            name: "audit"
+        }
+    },
     dashboard:{
         home: {
             path:'/',
+            name:'login'
+        },
+        dashboard: {
+            path:'/dashboard',
             name:'dashboard'
         },
-        card:{
-            path:'/my-card',
-            name:'my-card'
+        client: {
+            path:'/clients',
+            name:'clients'
         },
-        finance:{
-            path:'/finance-chart',
-            name:'finance-chart'
+        revenue: {
+            path:'/revenue',
+            name:'revenue'
         },
-        library:{
-            path:'/library',
-            name:'library'
+        expense: {
+            path:'/expenses',
+            name:'expenses'
         },
-        libraryDetails:{
-            path:'/library-details',
-            name:'library-details'
+        tax: {
+            path:'/tax',
+            name:'tax'
         },
-        settings:{
-            path:'/settings',
-            name:'settings'
+        taxCalculator: {
+            path:'/tax-calculator',
+            name:'tax-calculator'
         },
-        hra:{
-            path:'/hra',
-            name:'hra'
+        invoice: {
+            path:'/invoice',
+            name:'invoice'
+        },
+        service: {
+            path:'/services',
+            name:'services'
+        },
+        employee: {
+            path: "/employees",
+            name: "employees"
+        },
+        settings: {
+            path: "/settings",
+            name: "settings"
+        },
+        rate: {
+            path: "/rate",
+            name: "rate"
+        },
+        vat: {
+            path: "/vat",
+            name: "vat"
         }
     },
     hraQuestions:{

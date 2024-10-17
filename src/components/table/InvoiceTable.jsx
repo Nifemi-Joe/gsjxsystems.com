@@ -1,6 +1,5 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,45 +9,71 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
-import MoreLines from "../../assets/images/more-line.svg"
-import styled from "styled-components";
 import GreenDot from "../../assets/images/green-dot.svg"
 import RedDot from "../../assets/images/red-dot.svg"
 import GreyDot from "../../assets/images/grey-dot.svg"
-import Plus from "../../assets/images/add-line.svg"
-function createData(id, name, title, total, contact, icon, status) {
-	return {
-		id,
-		name,
-		title,
-		contact,
-		total,
-		icon,
-		status
-	};
-}
+import styled from "styled-components";
+import {useContext, useState} from "react";
+import IconButton from "@mui/material/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import InvoiceDetailsModal from "../modal/InvoiceDetailsModal";
+import axios from "axios";
+import {DataContext} from "../../context/DataContext";
+import {useAuth} from "../../store/auth/AuthContext";
 
-const rows = [
-	createData("001", 'ABC Corp', "Website Design", 2500, "abc@email.com", "", "Active" ),
-	createData("002", 'Delta Designs', "Branding Package", 3500, "jake@deltadesigns.com", "", "Active"),
-	createData("003", 'Urban Tech', "Saas Dashboard Design", 4200, "sydney@urbantech.com", "","Active"),
-	createData("005", 'NexaTech', "Mobile App UI/UX", 5000, "steve@nexatech.com", "","Completed"),
-	createData("006", 'ByteBloom', "Mobile App UI/UX", 6500, "ryan@bytebloom.com", "","Inactive"),
-	createData("007", 'VirtuFusion', "VR Interface Design", 4800, "abesh@virtufusion.com", "", "Active"),
-	createData("008", 'NeuralNet Systems', "AI Platform UI", 3800, "dave@neuralnet.com", "", "Inactive"),
-	createData("009", 'Skyward Drones', "Drone Control UI", 5200, "contact@skywarddrones.com", "", "Completed"),
-	createData("010", 'DataDive Analytics', "Data Visualisation Tool", 4000, "support@datadrive.com", "", "Active")
+const headCells = [
+	{
+		id: 'id',
+		numeric: false,
+		disablePadding: true,
+		label: 'Invoice No.',
+	},
+	{
+		id: 'ref',
+		numeric: true,
+		disablePadding: false,
+		label: 'Ref. No.',
+	},
+	{
+		id: 'name',
+		numeric: true,
+		disablePadding: false,
+		label: 'Client',
+	},
+	{
+		id: 'trandate',
+		numeric: true,
+		disablePadding: false,
+		label: 'Transaction Date',
+	},
+	{
+		id: 'paid',
+		numeric: true,
+		disablePadding: false,
+		label: 'Amount Paid (₦)',
+	},
+	{
+		id: 'dueamount',
+		numeric: true,
+		disablePadding: false,
+		label: 'Amount Due (₦)',
+	},
+	{
+		id: 'status',
+		numeric: true,
+		disablePadding: false,
+		label: 'Status',
+	},
+	{
+		id: 'actions',
+		numeric: false,
+		disablePadding: false,
+		label: '',
+	},
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -67,10 +92,6 @@ function getComparator(order, orderBy) {
 		: (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
 	const stabilizedThis = array.map((el, index) => [el, index]);
 	stabilizedThis.sort((a, b) => {
@@ -83,54 +104,8 @@ function stableSort(array, comparator) {
 	return stabilizedThis.map((el) => el[0]);
 }
 
-const headCells = [
-	{
-		id: 'id',
-		numeric: false,
-		disablePadding: true,
-		label: 'Client ID',
-	},
-	{
-		id: 'name',
-		numeric: true,
-		disablePadding: false,
-		label: 'Client Name',
-	},
-	{
-		id: 'title',
-		numeric: true,
-		disablePadding: false,
-		label: 'Project Title',
-	},
-	{
-		id: 'contact',
-		numeric: true,
-		disablePadding: false,
-		label: 'Contact',
-	},
-	{
-		id: 'total',
-		numeric: true,
-		disablePadding: false,
-		label: 'Total Invoice ($)',
-	},
-	{
-		id: 'status',
-		numeric: true,
-		disablePadding: false,
-		label: 'Status',
-	},
-	{
-		id: 'icon',
-		numeric: true,
-		disablePadding: false,
-		label: '',
-	},
-];
-
 function EnhancedTableHead(props) {
-	const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
-		props;
+	const { order, orderBy, onRequestSort } = props;
 	const createSortHandler = (property) => (event) => {
 		onRequestSort(event, property);
 	};
@@ -142,7 +117,7 @@ function EnhancedTableHead(props) {
 					<TableCell
 						key={headCell.id}
 						align="left"
-						padding={headCell.disablePadding ? 'none' : 'normal'}
+						padding={headCell.disablePadding ? '16px' : 'normal'}
 						sortDirection={orderBy === headCell.id ? order : false}
 					>
 						<TableSortLabel
@@ -165,162 +140,78 @@ function EnhancedTableHead(props) {
 }
 
 EnhancedTableHead.propTypes = {
-	numSelected: PropTypes.number.isRequired,
 	onRequestSort: PropTypes.func.isRequired,
-	onSelectAllClick: PropTypes.func.isRequired,
 	order: PropTypes.oneOf(['asc', 'desc']).isRequired,
 	orderBy: PropTypes.string.isRequired,
-	rowCount: PropTypes.number.isRequired,
 };
 
 export const Button = styled.button`
-    /* Type=Secondary, Size=Large, States=Focused, Icon Only=False */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 16px;
+  height: 52px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+  letter-spacing: 0.01em;
+  color: #0D0D12;
+  background: #FFFFFF;
+  box-shadow: 0px 0px 1px 1px rgba(129, 136, 152, 0.1), inset 0px 0px 0px 1px #C1C7D0;
+  border-radius: 12px;
+  transition: all 0.3s ease-in;
+  &:hover {
+    background: rgba(129, 136, 152, 0.1);
+  }
+`;
 
-    /* Auto layout */
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 0px 16px;
-    gap: 8px;
-    height: 52px;
-    font-weight: 500;
-    font-size: 16px;
-	transition: all 0.3s ease-in;
-    line-height: 24px;
-    text-align: center;
-    letter-spacing: 0.01em;
-    color: #0D0D12;
-    background: #FFFFFF;
-    /* Focused/gray */
-    box-shadow: 0px 0px 1px 1px rgba(129, 136, 152, 0.1), inset 0px 0px 0px 1px #C1C7D0;
-    border-radius: 12px;
-	&:hover{
-		background:  rgba(129, 136, 152, 0.1);
-	}
-`
+const StatusText = styled.span`
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  padding: 2px 10px 2px 8px;
+  background: #ECF9F7;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 14px;
+    gap: 4px;
+  line-height: 20px;
+  text-align: center;
+  color: #267666;
+`;
 
-function EnhancedTableToolbar(props) {
-	const { numSelected } = props;
+const GreyStatusText = styled(StatusText)`
+  background: #ECEFF3;
+  color: #0D0D12;
+`;
 
+const RedStatusText = styled(StatusText)`
+  background: #FCE8EC;
+  color: #B21634;
+`;
+
+function EnhancedTableToolbar({ searchQuery, setSearchQuery, onDownload }) {
 	return (
-		<Toolbar
-			sx={{
-				pl: { sm: 2 },
-				pr: { xs: 1, sm: 1 },
-				...(numSelected > 0 && {
-					bgcolor: (theme) =>
-						alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-				}),
-			}}
-		>
-			{numSelected > 0 && (
-				<Typography
-					sx={{ flex: '1 1 100%' }}
-					color="inherit"
-					variant="subtitle1"
-					component="div"
-				>
-					{numSelected} selected
-				</Typography>
-			)}
-
-			{numSelected > 0 ? (
-				<Tooltip title="Delete">
-					<IconButton>
-						<DeleteIcon />
-					</IconButton>
-				</Tooltip>
-			) : (
-				<Tooltip title="Filter list" className="flex justify-between w-full pb-3 pt-3">
-					<IconButton>
-						<FilterListIcon />
-					</IconButton>
-					<Button><img src={Plus} alt="Add"/>Add Client</Button>
-				</Tooltip>
-			)}
-		</Toolbar>
+		<></>
 	);
 }
 
-EnhancedTableToolbar.propTypes = {
-	numSelected: PropTypes.number.isRequired,
-};
-
-const ContactText = styled.span`
-	color: rgb(44,152,245);
-	font-weight: 500;
-`
-
-const StatusText = styled.span`
-    /* Styles=Fill, Size=Medium, Type=Dot, Colors=Green */
-    /* Auto layout */
-    display: flex;
-	width: fit-content;
-    flex-direction: row;
-    align-items: center;
-    padding: 2px 10px 2px 8px;
-    gap: 4px;
-    background: #ECF9F7;
-    border-radius: 16px;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
-    /* identical to box height, or 143% */
-    text-align: center;
-    letter-spacing: 0.01em;
-    color: #267666;
-`
-
-const GreyStatusText = styled(StatusText)`
-	background: #ECEFF3;
-	color: #0D0D12;
-`
-
-const RedStatusText = styled(StatusText)`
-	background: #FCE8EC;
-	color: #B21634;
-`
-
-export default function EnhancedTable() {
+export default function InvoiceTable({ invoices, handleEdit, changeViewMode }) {
 	const [order, setOrder] = React.useState('asc');
-	const [orderBy, setOrderBy] = React.useState('calories');
+	const [orderBy, setOrderBy] = React.useState('id');
 	const [selected, setSelected] = React.useState([]);
 	const [page, setPage] = React.useState(0);
-	const [dense, setDense] = React.useState(false);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
+	const [searchQuery, setSearchQuery] = React.useState('');;
+	const {setInvoices} = useContext(DataContext);
+	const {userDetails} = useAuth();
+
+	const [openModal, setOpenModal] = useState(false)
 	const handleRequestSort = (event, property) => {
 		const isAsc = orderBy === property && order === 'asc';
 		setOrder(isAsc ? 'desc' : 'asc');
 		setOrderBy(property);
-	};
-
-	const handleSelectAllClick = (event) => {
-		if (event.target.checked) {
-			const newSelected = rows.map((n) => n.id);
-			setSelected(newSelected);
-			return;
-		}
-		setSelected([]);
-	};
-
-	const handleClick = (event, id) => {
-		const selectedIndex = selected.indexOf(id);
-		let newSelected = [];
-
-		if (selectedIndex === -1) {
-			newSelected = newSelected.concat(selected, id);
-		} else if (selectedIndex === 0) {
-			newSelected = newSelected.concat(selected.slice(1));
-		} else if (selectedIndex === selected.length - 1) {
-			newSelected = newSelected.concat(selected.slice(0, -1));
-		} else if (selectedIndex > 0) {
-			newSelected = newSelected.concat(
-				selected.slice(0, selectedIndex),
-				selected.slice(selectedIndex + 1),
-			);
-		}
-		setSelected(newSelected);
 	};
 
 	const handleChangePage = (event, newPage) => {
@@ -332,82 +223,172 @@ export default function EnhancedTable() {
 		setPage(0);
 	};
 
-	const handleChangeDense = (event) => {
-		setDense(event.target.checked);
+	const handleDownload = () => {
+		const csvRows = [
+			['Invoice No.', 'Ref. No.', 'Client', 'Transaction Date', 'Amount Paid', 'Amount Due', 'Status'],
+			...invoices.map(invoice => [
+				invoice.invoiceNo,
+				invoice.referenceNumber,
+				invoice.companyName,
+				invoice.trandate,
+				invoice.amountPaid,
+				invoice.amountDue,
+				invoice.status
+			])
+		];
+		const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
+		const encodedUri = encodeURI(csvContent);
+		const link = document.createElement('a');
+		link.setAttribute('href', encodedUri);
+		link.setAttribute('download', 'invoices.csv');
+		document.body.appendChild(link);
+		link.click();
 	};
 
-	const isSelected = (id) => selected.indexOf(id) !== -1;
-
-	// Avoid a layout jump when reaching the last page with empty rows.
-	const emptyRows =
-		page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+	const filteredRows = invoices.filter(
+		(invoice) =>
+			(invoice._id && invoice._id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+			(invoice.ref && invoice.ref.toLowerCase().includes(searchQuery.toLowerCase())) ||
+			(invoice.name && invoice.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+			(invoice.trandate && invoice.trandate.toLowerCase().includes(searchQuery.toLowerCase())) ||
+			(invoice.paid && invoice.paid.toString().includes(searchQuery)) ||
+			(invoice.dueamount && invoice.dueamount.toString().includes(searchQuery)) ||
+			(invoice.status && invoice.status.toLowerCase().includes(searchQuery.toLowerCase()))
+	);
 
 	const visibleRows = React.useMemo(
 		() =>
-			stableSort(rows, getComparator(order, orderBy)).slice(
+			stableSort(filteredRows, getComparator(order, orderBy)).slice(
 				page * rowsPerPage,
-				page * rowsPerPage + rowsPerPage,
+				page * rowsPerPage + rowsPerPage
 			),
-		[order, orderBy, page, rowsPerPage],
+		[order, orderBy, page, rowsPerPage, filteredRows]
 	);
+	function formatDate(dateString) {
+		const date = new Date(dateString);
+		const formatter = new Intl.DateTimeFormat('en-GB', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
+		});
+		return formatter.format(date);
+	}
+	const [anchorEl, setAnchorEl] = React.useState(null);
+	const [selectedInvoice, setSelectedInvoice] = React.useState({_id: ""});
 
+	const handleMenuClick = (event, row) => {
+		setAnchorEl(event.currentTarget);
+		setSelectedInvoice(row);
+		console.log(row)
+	};
+
+	const handleMenuClose = () => {
+		setAnchorEl(null);
+	};
+
+	const handleModalClose = () => {
+		setOpenModal(false)
+	}
+
+	const handleView = (invoice) => {
+		changeViewMode(true)
+		setSelectedInvoice(invoice);
+		handleMenuClose();
+		handleEdit(invoice)
+		// setOpenModal(true);
+	};
+
+	const handleDelete = async (invoice) => {
+
+		// Implement delete logic here
+		try {
+			await axios.post(`https://tax-app-backend.onrender.com/api/invoices/delete/${selectedInvoice._id}`, {id: selectedInvoice._id});
+			const response = await axios.get("https://tax-app-backend.onrender.com/api/invoices/spoolInvoices", {});
+			console.log(response.data);
+
+			setInvoices(response.data.responseData)
+			// Process the data as needed
+		} catch (error) {
+			if (error.response) {
+				// Server responded with a status other than 2xx
+				console.error('Response Error:', error.response.data);
+			} else if (error.request) {
+				// No response received
+				console.error('No Response:', error.request);
+			} else {
+				// Other errors
+				console.error('Error Message:', error.message);
+			}
+		}
+		handleMenuClose();
+	};
+
+	const {clients} = useContext(DataContext);
 	return (
-		<Box sx={{ width: '100%' }} className="pl-6 pr-5">
+		<Box sx={{ width: '100%' }}>
 			<Paper sx={{ width: '100%', mb: 2 }}>
-				<EnhancedTableToolbar numSelected={selected.length} />
+				<EnhancedTableToolbar
+					searchQuery={searchQuery}
+					setSearchQuery={setSearchQuery}
+					onDownload={handleDownload}
+				/>
 				<TableContainer>
-					<Table
-						sx={{ minWidth: 750 }}
-						aria-labelledby="tableTitle"
-						size={dense ? 'small' : 'medium'}
-					>
+					<Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
 						<EnhancedTableHead
-							numSelected={selected.length}
 							order={order}
-							align="right"
 							orderBy={orderBy}
-							onSelectAllClick={handleSelectAllClick}
 							onRequestSort={handleRequestSort}
-							rowCount={rows.length}
+							rowCount={filteredRows.length}
 						/>
 						<TableBody>
 							{visibleRows.map((row, index) => {
-								const isItemSelected = isSelected(row.id);
-								const labelId = `enhanced-table-checkbox-${index}`;
-
 								return (
 									<TableRow
 										hover
-										onClick={(event) => handleClick(event, row.id)}
-										role="checkbox"
-										aria-checked={isItemSelected}
 										tabIndex={-1}
-										key={row.id}
-										selected={isItemSelected}
-										sx={{ cursor: 'pointer' }}
+										key={row._id}
 									>
-										<TableCell
-											component="th"
-											id={labelId}
-											scope="row"
-											align="left"
-											padding="12px"
-										>
-											{row.id}
+										<TableCell align="left" onClick={() => handleView(row)}>{row.invoiceNo}</TableCell>
+										<TableCell align="left" onClick={() => handleView(row)}>{row.referenceNumber}</TableCell>
+										<TableCell align="left">{clients.length > 0 && clients.find(c => c._id === row.clientId)  ? clients.find(c => c._id === row.clientId).name : <span className="text-red-600">Deleted Client</span> }</TableCell>
+										<TableCell align="left">{ row.transactionDate && formatDate(row.transactionDate) || row.createdAt && formatDate(row.createdAt)  || row.timestamps}</TableCell>
+										<TableCell align="left">{row.amountPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+										<TableCell align="left">{row.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+										<TableCell align="left">
+											{row.status === 'Paid' && <StatusText><img src={GreenDot} alt="Green Dot"/>Paid</StatusText>}
+											{row.status === 'Pending' && <GreyStatusText><img src={GreyDot} alt="Grey Dot"/>Pending</GreyStatusText>}
+											{row.status === 'Overdue' && <RedStatusText><img src={RedDot} alt="Red Doot"/>Overdue</RedStatusText>}
+											{row.status === 'Canceled' && <RedStatusText><img src={RedDot} alt="Red Doot"/>Canceled</RedStatusText>}
+
 										</TableCell>
-										<TableCell align="left">{row.name}</TableCell>
-										<TableCell align="left">{row.title}</TableCell>
-										<TableCell align="left"><ContactText>{row.contact}</ContactText></TableCell>
-										<TableCell align="left"><span className="font-semibold">{row.total}</span></TableCell>
-										<TableCell align="left">{row.status === "Active" ? <StatusText><img src={GreenDot} alt="Green Dot"/><span>{row.status}</span></StatusText> : row.status === "Inactive" ? <RedStatusText><img src={RedDot} alt="Red Doot"/><span>{row.status}</span></RedStatusText> : <GreyStatusText><img src={GreyDot} alt="Grey Dot"/><span>{row.status}</span></GreyStatusText>}</TableCell>
-										<TableCell align="left"><img src={MoreLines} alt="More lines"/></TableCell>
+										<TableCell align="left">
+											{/* Actions Menu Button */}
+											<IconButton onClick={(e) => handleMenuClick(e, row)}>
+												<MoreVertIcon />
+											</IconButton>
+											<Menu
+												id="actions-menu"
+												anchorEl={anchorEl}
+												open={Boolean(anchorEl)}
+												onClose={handleMenuClose}
+											>
+												<MenuItem onClick={() => handleView(row)}>View</MenuItem>
+												{
+													(userDetails.role === "superadmin" || userDetails.role === "admin" || userDetails.role === "clientAdmin" || userDetails.permissions.includes("edit-invoice")) && <MenuItem onClick={() => {handleMenuClose(); handleEdit(row)}}>Edit</MenuItem>
+												}
+												{
+													(userDetails.role === "superadmin" || userDetails.role === "admin" || userDetails.role === "clientAdmin" || userDetails.permissions.includes("delete-invoice")) && <MenuItem onClick={() => handleDelete(row)}>Delete</MenuItem>
+												}
+												<MenuItem onClick={() => handleDownload(row)}>Download</MenuItem>
+											</Menu>
+										</TableCell>
 									</TableRow>
 								);
 							})}
-							{emptyRows > 0 && (
+							{rowsPerPage - visibleRows.length > 0 && (
 								<TableRow
 									style={{
-										height: (dense ? 33 : 53) * emptyRows,
+										height: 53 * (rowsPerPage - visibleRows.length),
 									}}
 								>
 									<TableCell colSpan={6} />
@@ -417,15 +398,30 @@ export default function EnhancedTable() {
 					</Table>
 				</TableContainer>
 				<TablePagination
-					rowsPerPageOptions={[5, 10, 25]}
+					rowsPerPageOptions={[10, 25, 50]}
 					component="div"
-					count={rows.length}
+					count={filteredRows.length}
 					rowsPerPage={rowsPerPage}
 					page={page}
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>
 			</Paper>
+			<InvoiceDetailsModal isOpen={openModal} onClose={handleModalClose} invoiceId={selectedInvoice._id}/>
 		</Box>
 	);
 }
+
+InvoiceTable.propTypes = {
+	invoices: PropTypes.arrayOf(
+		PropTypes.shape({
+			id: PropTypes.string.isRequired,
+			ref: PropTypes.string.isRequired,
+			name: PropTypes.string.isRequired,
+			trandate: PropTypes.string.isRequired,
+			paid: PropTypes.number.isRequired,
+			dueamount: PropTypes.number.isRequired,
+			status: PropTypes.oneOf(['Paid', 'Pending', 'Overdue']).isRequired,
+		})
+	).isRequired,
+};
